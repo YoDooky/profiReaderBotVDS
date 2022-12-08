@@ -11,7 +11,8 @@ async def start_command(message: types.Message, state: FSMContext):
         return
     user_object = User(telegram_id=message.from_user.id,
                        privilege='user',
-                       registration_timestamp=str(datetime.datetime.now()))
+                       registration_timestamp=str(datetime.datetime.now()),
+                       current_book='')
     books_controller.db_write_users(user_object)
     await state.finish()
     keyboard = markups.get_start_menu()

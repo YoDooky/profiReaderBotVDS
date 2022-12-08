@@ -20,7 +20,8 @@ class DbCreator:
             self.cursor.execute(f"""CREATE TABLE {USERS_TABLE} (
                             telegram_id bigint PRIMARY KEY,
                             privilege text,
-                            registration_timestamp text 
+                            registration_timestamp text,
+                            current_book text 
                             )""")
 
     def __create_progress_table(self):
@@ -30,7 +31,9 @@ class DbCreator:
                             id SERIAL PRIMARY KEY,
                             fk_user_id bigint REFERENCES {USERS_TABLE}(telegram_id),
                             last_page text,
-                            book_filename text 
+                            book_filename text,
+                            read_timestamp text,
+                            shedule_read_timestamp text
                             )""")
 
     def create_book_table(self, table_name: str):

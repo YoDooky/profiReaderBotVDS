@@ -22,12 +22,25 @@ def insert_db(table: str, column_val: Dict):
 
 def update_db(table: str, row_val: Dict, column_val: Dict):
     """Updates data in db"""
-    editable_data = ', '.join([f'{key} = {value}' for key, value in column_val.items()])
+    column = list(column_val.keys())[0]
+    column_value = list(column_val.values())[0]
+    if isinstance(column_value, str):
+        column_value = "'" + column_value + "'"
+    row = list(row_val.keys())
+    if len(row) == 2:  # крайне плохая реализация, но рабочая в контексте одного проекта
+        cursor.execute(
+            f"UPDATE {table.lower()} "
+            f"SET {column} = {column_value} "
+            f"WHERE {row[0]} = {row_val.get(row[0])} AND "
+            f"{row[1]} = '{row_val.get(row[1])}';"
+        )
+        conn.commit()
+        return
     row = list(row_val.keys())[0]
     row_value = row_val.get(row)
     cursor.execute(
         f"UPDATE {table.lower()} "
-        f"SET {editable_data} "
+        f"SET {column} = {column_value} "
         f"WHERE {row} = {row_value};"
     )
     conn.commit()

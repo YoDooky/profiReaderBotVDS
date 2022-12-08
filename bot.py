@@ -29,7 +29,8 @@ def set_logging():
 
 async def setup_bot_commands():
     bot_commands = [
-        types.BotCommand(command="/start", description="рестарт бота")
+        types.BotCommand(command="/start", description="рестарт бота"),
+        types.BotCommand(command="/select", description="выбрать книгу")
     ]
     await bot.set_my_commands(bot_commands)
 

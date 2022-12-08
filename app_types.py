@@ -13,3 +13,13 @@ class User:
     telegram_id: int
     privilege: str
     registration_timestamp: str
+    current_book: str
+
+
+@dataclass
+class Progress:
+    telegram_id: int
+    last_part_numb: int
+    book_name: str
+    read_timestamp: str
+    shedule_read_timestamp: str

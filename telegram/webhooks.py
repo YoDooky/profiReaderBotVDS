@@ -3,6 +3,7 @@ import asyncio
 
 from config.bot_config import WEBHOOK_PATH
 from config.bot_config import WEBHOOK_URL
+from telegram.book_schedule import Schedule
 
 
 def init_api(bot: Bot, dp: Dispatcher, app):
@@ -13,6 +14,8 @@ def init_api(bot: Bot, dp: Dispatcher, app):
             await bot.set_webhook(
                 url=WEBHOOK_URL
             )
+        schedule = Schedule(bot)
+        asyncio.create_task(schedule.scheduler())
 
     @app.post(WEBHOOK_PATH)
     async def bot_webhook(update: dict):
