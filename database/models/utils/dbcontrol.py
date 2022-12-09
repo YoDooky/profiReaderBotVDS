@@ -1,6 +1,6 @@
 from typing import Dict, List, Tuple
 from database.models import createdb
-from config.db_config import USERS_TABLE, PROGRESS_TABLE
+from config.db_config import USERS_TABLE, PROGRESS_TABLE, MESSAGES_TABLE
 
 database = createdb.DbCreator()
 conn = database.conn
@@ -134,7 +134,8 @@ def check_table_exist(table: str) -> bool:
 def check_db_exist():
     table_users_exist = check_table_exist(USERS_TABLE)
     table_progress_exist = check_table_exist(PROGRESS_TABLE)
-    if table_users_exist and table_progress_exist:
+    table_messages_exist = check_table_exist(MESSAGES_TABLE)
+    if table_users_exist and table_progress_exist and table_messages_exist:
         return
     _init_db_()
 

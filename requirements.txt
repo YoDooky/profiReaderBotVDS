@@ -6,3 +6,4 @@ psycopg2~=2.9.5
 EbookLib~=0.18
 beautifulsoup4~=4.11.1
 aioschedule~=0.5.2
+html2text==2020.1.16

@@ -11,3 +11,4 @@ DB_PORT = os.getenv('DB_PORT')
 USERS_TABLE = 'users'
 BOOKS_TABLE = 'books'
 PROGRESS_TABLE = 'progress'
+MESSAGES_TABLE = 'messages'

@@ -1,6 +1,6 @@
 import psycopg2
 from config import db_config
-from config.db_config import USERS_TABLE, BOOKS_TABLE, PROGRESS_TABLE
+from config.db_config import USERS_TABLE, PROGRESS_TABLE, MESSAGES_TABLE
 
 
 class DbCreator:
@@ -19,6 +19,9 @@ class DbCreator:
         with self.conn:
             self.cursor.execute(f"""CREATE TABLE {USERS_TABLE} (
                             telegram_id bigint PRIMARY KEY,
+                            telegram_username text,
+                            telegram_first_name text,
+                            telegram_last_name text,
                             privilege text,
                             registration_timestamp text,
                             current_book text 
@@ -30,10 +33,24 @@ class DbCreator:
             self.cursor.execute(f"""CREATE TABLE {PROGRESS_TABLE} (
                             id SERIAL PRIMARY KEY,
                             fk_user_id bigint REFERENCES {USERS_TABLE}(telegram_id),
-                            last_page text,
+                            last_page int,
+                            pages_amount int,
                             book_filename text,
                             read_timestamp text,
                             shedule_read_timestamp text
+                            )""")
+
+    def __create_messages_table(self):
+        """Create table with bot messages"""
+        with self.conn:
+            self.cursor.execute(f"""CREATE TABLE {MESSAGES_TABLE} (
+                            id int PRIMARY KEY,
+                            greeting_msg text,
+                            add_book_msg text,
+                            book_format_err_msg text,
+                            first_book_msg text,
+                            same_book_msg text,
+                            reeding_complete_msg text
                             )""")
 
     def create_book_table(self, table_name: str):
@@ -56,4 +73,9 @@ class DbCreator:
             self.__create_progress_table()
         except Exception as ex:
             print(f'[ERR] PostreSQL: Cant create progress table\n'
+                  f'[EX] {ex}')
+        try:
+            self.__create_messages_table()
+        except Exception as ex:
+            print(f'[ERR] PostreSQL: Cant create messages table\n'
                   f'[EX] {ex}')

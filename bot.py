@@ -7,10 +7,12 @@ from aiogram.contrib.middlewares.logging import LoggingMiddleware
 import logging
 import uvicorn
 
-from config.bot_config import TOKEN, ACCESS_ID_LIST
+from config.bot_config import TOKEN
 from telegram.handlers import common
-from telegram.handlers import send_book
-from telegram.auth import AccessMiddleware
+from telegram.handlers import send_book, admin
+
+
+# from telegram.auth import AccessMiddleware
 
 
 class BotInit:
@@ -19,7 +21,7 @@ class BotInit:
     def __init__(self):
         self.bot = Bot(token=TOKEN, parse_mode=types.ParseMode.HTML)
         self.dp = Dispatcher(self.bot, storage=MemoryStorage())
-        self.dp.middleware.setup(AccessMiddleware(ACCESS_ID_LIST))
+        # self.dp.middleware.setup(AccessMiddleware(ACCESS_ID_LIST))
 
 
 def set_logging():
@@ -39,6 +41,8 @@ def init_handlers():
     common.register_handlers(dp)
     user_handler = send_book.SetPost(bot)
     user_handler.register_handlers(dp)
+    admin_handler = admin.AdminPanel(bot)
+    admin_handler.register_handlers(dp)
 
 
 async def main():
