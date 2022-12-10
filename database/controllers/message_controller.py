@@ -21,6 +21,24 @@ def db_init_message_table():
     })
 
 
+def db_read_messages() -> Message:
+    """Read bot messages from DB"""
+    data = dbcontrol.fetchall(MESSAGES_TABLE, ['greeting_msg',
+                                               'add_book_msg',
+                                               'book_format_err_msg',
+                                               'first_book_msg',
+                                               'same_book_msg',
+                                               'reeding_complete_msg'])
+
+    messages = Message(greeting_msg=data[0].get('greeting_msg'),
+                       add_book_msg=data[0].get('add_book_msg'),
+                       book_format_err_msg=data[0].get('book_format_err_msg'),
+                       first_book_msg=data[0].get('first_book_msg'),
+                       same_book_msg=data[0].get('same_book_msg'),
+                       reeding_complete_msg=data[0].get('reeding_complete_msg'))
+    return messages
+
+
 def db_update_message_table(message: Dict):
     """Updates message table"""
     dbcontrol.update_db(MESSAGES_TABLE, {'id': 1}, message)

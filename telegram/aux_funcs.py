@@ -1,10 +1,10 @@
 import datetime
-import textwrap
 import ebooklib
 from ebooklib import epub
 from config.bot_config import MAX_MESSAGE_LENGHT
 from bs4 import BeautifulSoup
 from typing import List, Dict
+
 from database.controllers import books_controller
 from app_types import Book, Progress
 import vars_global
@@ -37,6 +37,7 @@ def get_last_part_numb(user_id: int, book_name: str) -> int:
 
 def init_first_book(user_id: int, filepath: str) -> str | Dict:
     """Writes progress and returns books part text from first loaded book"""
+    write_book_to_db(user_id, filepath)
     book_name = get_book_name(filepath)
     new_book_flag = True
     last_red_page = get_last_part_numb(user_id, book_name)
@@ -127,7 +128,7 @@ def get_target_part_text(user_id: int, dec_inc: str) -> str | None:
     progress.read_timestamp = str(datetime.datetime.now())
     progress.shedule_read_timestamp = str(datetime.datetime.now() + datetime.timedelta(days=1))
     books_controller.db_update_progress_table(progress)
-    vars_global.update_schedule = [True]
+    vars_global.update_schedule = [True, user_id]
     return books_part_text
 
 
@@ -137,10 +138,3 @@ def write_book_to_db(user_id: int, filepath: str):
     text_parts = divide_string_to_parts(epub_text, user_id)
     table_name = get_book_name(filepath)
     books_controller.db_add_book_table(table_name, text_parts)
-
-
-filename = 'arkadij_natanovich_strugatckij-trudno_bit_bogom-1518601760.epub'
-# filename = 'Greenberg, Martin H. (ed) - The Edgar Award Book - 1996.epub'
-# filename = 'Ben and David Crystal - You Say Potato - 2014.epub'
-write_book_to_db(806563982,
-                 f'C:/PyProject/profiReaderBot/epub_files/{filename}')

@@ -3,8 +3,8 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from telegram import markups, aux_funcs
-from database.controllers import books_controller
-from config.bot_config import ADD_BOOK_MSG, BOOK_FORMAT_ERR_MSG, FIRST_BOOK_MSG, SAME_BOOK_MSG, REEDING_COMPLETE_MSG
+from database.controllers import books_controller, message_controller
+from config import bot_config
 from config.bot_config import EPUB_FOLDER
 import vars_global
 
@@ -27,12 +27,39 @@ class AdminPanel:
     @staticmethod
     async def edit_greeting_msg(call: types.CallbackQuery, state: FSMContext):
         await call.message.answer('Введи новый текст сообщения:')
-        state.update_data(target_msg=call.data)
+        await state.update_data(target_msg=call.data)
         await state.set_state(EditState.wait_edit_text.state)
 
     @staticmethod
     async def accept_edit_text(message: types.Message, state: FSMContext):
+        user_data = await state.get_data()
+        target_msg = user_data.get('target_msg')
+        messages = message_controller.db_read_messages()
+        if target_msg == 'GREETING_MSG':
+            message_controller.db_update_message_table({'greeting_msg': message.text})
+            bot_config.GREETING_MSG = messages.greeting_msg
 
+        elif target_msg == 'ADD_BOOK_MSG':
+            message_controller.db_update_message_table({'add_book_msg': message.text})
+            bot_config.ADD_BOOK_MSG = messages.add_book_msg
+
+        elif target_msg == 'BOOK_FORMAT_ERR_MSG':
+            message_controller.db_update_message_table({'book_format_err_msg': message.text})
+            bot_config.BOOK_FORMAT_ERR_MSG = messages.book_format_err_msg
+
+        elif target_msg == 'FIRST_BOOK_MSG':
+            message_controller.db_update_message_table({'first_book_msg': message.text})
+            bot_config.FIRST_BOOK_MSG = messages.first_book_msg
+
+        elif target_msg == 'SAME_BOOK_MSG':
+            message_controller.db_update_message_table({'same_book_msg': message.text})
+            bot_config.SAME_BOOK_MSG = messages.same_book_msg
+
+        elif target_msg == 'REEDING_COMPLETE_MSG':
+            message_controller.db_update_message_table({'reeding_complete_msg': message.text})
+            bot_config.REEDING_COMPLETE_MSG = messages.reeding_complete_msg
+
+        await message.answer('👌 Новый текст для выбранного сообщения успещно принят')
 
     def register_handlers(self, dp: Dispatcher):
         """Register handlers"""

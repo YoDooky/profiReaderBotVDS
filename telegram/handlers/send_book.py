@@ -3,8 +3,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from telegram import markups, aux_funcs
-from database.controllers import books_controller
-from config.bot_config import ADD_BOOK_MSG, BOOK_FORMAT_ERR_MSG, FIRST_BOOK_MSG, SAME_BOOK_MSG, REEDING_COMPLETE_MSG
+from database.controllers import books_controller, message_controller
 from config.bot_config import EPUB_FOLDER
 import vars_global
 
@@ -32,30 +31,30 @@ class SetPost:
     async def add_book(call: types.CallbackQuery, state: FSMContext):
         """Add post content"""
         await state.finish()
-        await call.message.answer(ADD_BOOK_MSG)
+        await call.message.answer(message_controller.db_read_messages().add_book_msg)
         await state.set_state(SendingState.wait_send_text.state)
 
     @staticmethod
     async def add_book_command(message: types.Message, state: FSMContext):
         """Add post content"""
         await state.finish()
-        await message.answer(ADD_BOOK_MSG)
+        await message.answer(message_controller.db_read_messages().add_book_msg)
         await state.set_state(SendingState.wait_send_text.state)
 
     async def get_book_text(self, message: types.Message, state: FSMContext):
         if '.epub' not in message.document.file_name:
-            await message.answer(BOOK_FORMAT_ERR_MSG)
+            await message.answer(message_controller.db_read_messages().book_format_err_msg)
             return
         filepath = f'{EPUB_FOLDER}{message.document.file_name}'
         await self.bot.download_file_by_id(message.document.file_id, filepath)
-        aux_funcs.write_book_to_db(message.chat.id, filepath)
-        books_part_text = aux_funcs.init_first_book(message.chat.id, filepath)
-        vars_global.update_schedule = [True]
+        user_id = message.chat.id
+        books_part_text = aux_funcs.init_first_book(user_id, filepath)
+        vars_global.update_schedule = [True, user_id]
         if books_part_text.get('new_book'):
-            await message.answer(FIRST_BOOK_MSG)
+            await message.answer(message_controller.db_read_messages().first_book_msg)
             keyboard = markups.get_next_part_button()
         else:
-            await message.answer(SAME_BOOK_MSG)
+            await message.answer(message_controller.db_read_messages().same_book_msg)
             keyboard = markups.get_nav_menu()
         await message.answer(books_part_text.get('books_part_text'), reply_markup=keyboard)
         await state.finish()
@@ -65,7 +64,7 @@ class SetPost:
         """Go to next book part"""
         books_part_text = aux_funcs.get_target_part_text(call.message.chat.id, 'inc')
         if not books_part_text:
-            await call.message.edit_text(REEDING_COMPLETE_MSG)
+            await call.message.edit_text(message_controller.db_read_messages().reeding_complete_msg)
             return
         keyboard = markups.get_nav_menu()
         await call.message.edit_text(books_part_text, reply_markup=keyboard)
@@ -73,12 +72,13 @@ class SetPost:
     @staticmethod
     async def get_books_prev_part(call: types.CallbackQuery):
         """Go to prev book part"""
-        books_part_text = aux_funcs.get_target_part_text(call.message.chat.id, 'dec')
+        user_id = call.message.chat.id
+        books_part_text = aux_funcs.get_target_part_text(user_id, 'dec')
         if not books_part_text:
-            await call.message.edit_text(REEDING_COMPLETE_MSG)
+            await call.message.edit_text(message_controller.db_read_messages().reeding_complete_msg)
             return
-        book_name = books_controller.db_read_user_current_book(call.message.chat.id)
-        prev_page = aux_funcs.get_last_part_numb(call.message.chat.id, book_name)
+        book_name = books_controller.db_read_user_current_book(user_id)
+        prev_page = aux_funcs.get_last_part_numb(user_id, book_name)
         keyboard = markups.get_nav_menu()
         if prev_page == 1:
             keyboard = markups.get_next_part_button()

@@ -23,7 +23,7 @@ async def start_command(message: types.Message, state: FSMContext):
     keyboard = markups.get_start_menu()
     if message.chat.id == ADMIN_ID:
         keyboard = markups.show_bot_messages_menu()
-    await message.answer(GREETING_MSG, reply_markup=keyboard)
+    await message.answer(message_controller.db_read_messages().greeting_msg, reply_markup=keyboard)
 
 
 def register_handlers(dp: Dispatcher):

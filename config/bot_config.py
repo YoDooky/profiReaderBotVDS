@@ -14,7 +14,7 @@ EPUB_FOLDER = 'C:/PyProject/profiReaderBot/epub_files/'
 
 MAX_MESSAGE_LENGHT = 3500
 
-# bot messages
+# bot default messages
 GREETING_MSG = '👇 Нажми на кнопку "Начать работу с ботом" для продолжения'
 ADD_BOOK_MSG = '👉 Отправь мне книгу в формате ePub'
 BOOK_FORMAT_ERR_MSG = '⚠ Проверь формат. Файл должен быть в формате ePub'
