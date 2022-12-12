@@ -21,7 +21,7 @@ async def start_command(message: types.Message, state: FSMContext):
                        current_book='None')
     books_controller.db_write_users(user_object)
     keyboard = markups.get_start_menu()
-    if message.chat.id == ADMIN_ID:
+    if message.chat.id in ADMIN_ID:
         keyboard = markups.show_bot_messages_menu()
     await message.answer(message_controller.db_read_messages().greeting_msg, reply_markup=keyboard)
 

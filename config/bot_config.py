@@ -4,13 +4,13 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
 TOKEN = os.getenv('TOKEN')
-ADMIN_ID = int(os.getenv('ADMIN_ID'))
+ADMIN_ID = [int(os.getenv('ADMIN_ID_1')), int(os.getenv('ADMIN_ID_2'))]
 
-WEBHOOK_PATH = f"/main/{TOKEN}"
+WEBHOOK_PATH = f"/readerbot/{TOKEN}"
 APP_URL = os.getenv('APP_URL')
 WEBHOOK_URL = APP_URL + WEBHOOK_PATH
 
-EPUB_FOLDER = 'C:/PyProject/profiReaderBot/epub_files/'
+EPUB_FOLDER = '/home/dooky/readerBot/profiReaderBot/epub_files/'
 
 MAX_MESSAGE_LENGHT = 3500
 

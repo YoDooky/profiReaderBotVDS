@@ -109,6 +109,26 @@ def db_update_users_table(user_id: int, book_name: str):
     dbcontrol.update_db(USERS_TABLE, {'telegram_id': user_id}, {'current_book': book_name})
 
 
+def db_del_progress_data(user_id: int, book_name: str):
+    progress_data = dbcontrol.fetchall(PROGRESS_TABLE, [
+        'id',
+        'fk_user_id',
+        'last_page',
+        'pages_amount',
+        'book_filename',
+        'read_timestamp',
+        'shedule_read_timestamp'
+    ])
+    current_user_book_progress_id = ''
+    for data in progress_data:
+        if int(data.get('fk_user_id')) != user_id:
+            continue
+        if data.get('book_filename') != book_name:
+            continue
+        current_user_book_progress_id = data.get('id')
+    dbcontrol.delete(PROGRESS_TABLE, {'id': current_user_book_progress_id})
+
+
 def db_add_book_table(table_name: str, books_object_list: List[Book]):
     """Create book table with demand parts amount. Return True if table alerady exist"""
     if dbcontrol.check_table_exist(table_name):

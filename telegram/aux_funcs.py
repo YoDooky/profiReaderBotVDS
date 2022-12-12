@@ -4,6 +4,7 @@ from ebooklib import epub
 from config.bot_config import MAX_MESSAGE_LENGHT
 from bs4 import BeautifulSoup
 from typing import List, Dict
+import textwrap
 
 from database.controllers import books_controller
 from app_types import Book, Progress
@@ -35,7 +36,7 @@ def get_last_part_numb(user_id: int, book_name: str) -> int:
     return last_red_page
 
 
-def init_first_book(user_id: int, filepath: str) -> str | Dict:
+def init_first_book(user_id: int, filepath: str):
     """Writes progress and returns books part text from first loaded book"""
     write_book_to_db(user_id, filepath)
     book_name = get_book_name(filepath)
@@ -99,29 +100,38 @@ def parse_epub_data(filepath: str) -> str:
 def divide_string_to_parts(string_object: str, user_id: int) -> List[Book]:
     """Divivide string to list parts"""
     new_string = string_object.split('. ')
+    clear_string = []
+    for num, each_string in enumerate(new_string):
+        each_string = f'{each_string}. '
+        div_string = None
+        if len(each_string) >= MAX_MESSAGE_LENGHT:
+            div_string = textwrap.wrap(each_string, width=MAX_MESSAGE_LENGHT)
+        if isinstance(div_string, list):
+            clear_string = [*clear_string, *div_string]
+            continue
+        clear_string = [*clear_string, each_string]
     book_part = ''
     wrap_list = []
-    for part in new_string:
+    for part in clear_string:
         next_element_lenght = len(book_part) + len(part)
         if next_element_lenght >= MAX_MESSAGE_LENGHT:
             wrap_list.append(book_part)
             book_part = ''
-        book_part = f'{book_part}{part}. '
+        book_part = f'{book_part}{part}'
     book_parts = []
     for num_part, part in enumerate(wrap_list):
-        # book_parts.append({'user_create_id': user_id, 'part_numb': num_part + 1, 'part_text': part})
         book_parts.append(Book(user_create_id=user_id, part_numb=num_part + 1, part_text=part))
     return book_parts
 
 
-def get_target_part_text(user_id: int, dec_inc: str) -> str | None:
+def get_target_part_text(user_id: int, dec_inc: str):
     book_filename = books_controller.db_read_user_current_book(user_id)
     progress = books_controller.db_read_user_progress(user_id, book_filename)
-    if progress.last_part_numb == progress.parts_amount:
-        return
     if dec_inc == 'dec':
         target_page = progress.last_part_numb - 1
     else:
+        if progress.last_part_numb >= progress.parts_amount:
+            return
         target_page = progress.last_part_numb + 1
     books_part_text = books_controller.db_read_books_part_text(progress.book_name, target_page)
     progress.last_part_numb = target_page
@@ -138,3 +148,24 @@ def write_book_to_db(user_id: int, filepath: str):
     text_parts = divide_string_to_parts(epub_text, user_id)
     table_name = get_book_name(filepath)
     books_controller.db_add_book_table(table_name, text_parts)
+
+
+def get_progress_data(user_id: int, book_name: str):
+    progress_data = books_controller.db_read_user_progress(user_id, book_name)
+    last_part_numb = progress_data.last_part_numb
+    parts_amount = progress_data.parts_amount
+    progress_percent = round(last_part_numb * 100 / parts_amount, 2)
+    return {
+        'last_part_numb': last_part_numb,
+        'parts_amount': parts_amount,
+        'progress_percent': progress_percent
+    }
+
+
+def format_schedule_time(user_progress: Progress) -> str:
+    """Format time to HH:MM format"""
+    raw_scheduled_time = user_progress.shedule_read_timestamp
+    scheduled_time = raw_scheduled_time.split(' ')[1].split('.')[0].split(':')
+    scheduled_time = ':'.join([scheduled_time[0], scheduled_time[1]])
+    return scheduled_time
+
